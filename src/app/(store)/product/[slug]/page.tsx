@@ -1,13 +1,14 @@
-import Image from 'next/image'
+import Image from "next/image";
 
-import { api } from '@/data/api'
-import { Product } from '@/data/types/product'
-import { Metadata } from 'next'
+import { api } from "@/data/api";
+import { Product } from "@/data/types/product";
+import { Metadata } from "next";
+import { AddToCartButton } from "@/components/add-to-cart-button";
 
 interface ProductProps {
   params: {
-    slug: string
-  }
+    slug: string;
+  };
 }
 
 async function getProduct(slug: string): Promise<Product> {
@@ -15,33 +16,33 @@ async function getProduct(slug: string): Promise<Product> {
     next: {
       revalidate: 60 * 60, // 1 hour
     },
-  })
+  });
 
-  const product = await response.json()
+  const product = await response.json();
 
-  return product
+  return product;
 }
 
 export async function generateMetadata({
   params,
 }: ProductProps): Promise<Metadata> {
   const product = await getProduct(params.slug);
-  
+
   return {
     title: product.title,
-  }
+  };
 }
 
 export async function generateStaticParams() {
-  const response = await api('/products/featured')
-  const products: Product[] = await response.json()
+  const response = await api("/products/featured");
+  const products: Product[] = await response.json();
   return products.map((product) => {
-    return { slug: product.slug }
-  })
+    return { slug: product.slug };
+  });
 }
 
 export default async function ProductPage({ params }: ProductProps) {
-  const product = await getProduct(params.slug)
+  const product = await getProduct(params.slug);
 
   return (
     <div className="relative grid max-h-[860px] grid-cols-3">
@@ -64,17 +65,18 @@ export default async function ProductPage({ params }: ProductProps) {
 
         <div className="mt-8 flex items-center gap-3">
           <span className="inline-block rounded-full bg-violet-500 px-5 py-2.5 font-semibold">
-            {product.price.toLocaleString('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
+            {product.price.toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
               minimumFractionDigits: 0,
               maximumFractionDigits: 0,
             })}
           </span>
           <span className="text-sm text-zinc-400">
-            {(product.price / 12).toLocaleString('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
+            Em até 12x s/ juros de{" "}
+            {(product.price / 12).toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
             })}
           </span>
         </div>
@@ -110,13 +112,8 @@ export default async function ProductPage({ params }: ProductProps) {
           </div>
         </div>
 
-        <button
-          type="button"
-          className="mt-8 flex h-12 items-center justify-center rounded-full bg-emerald-600 font-semibold text-white"
-        >
-          Adicionar ao carrinho
-        </button>
+        <AddToCartButton productId={product.id} />
       </div>
     </div>
-  )
+  );
 }
